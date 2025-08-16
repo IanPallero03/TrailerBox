@@ -10,6 +10,9 @@ function App() {
   const [isClosing, setIsClosing] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
   const [genres, setGenres] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("popular"); 
+  const [activeGenre, setActiveGenre] = useState(null);
+
 
 
 const handleCloseModal = () => {
@@ -35,7 +38,7 @@ useEffect(() => {
 }, []);
 
 
-{/* Seccion Flecha hacia arriba */}
+// Seccion Flecha hacia arriba 
 useEffect(() => {
   const handleScroll = () => {
     if (window.scrollY > 300) {
@@ -54,7 +57,7 @@ const scrollToTop = () => {
 };
 
 
-{/* Seccion invocar peliculas */}
+// Seccion invocar peliculas 
 
 const getPopularMovies = async () => {
   let allMovies = [];
@@ -75,7 +78,7 @@ const getPopularMovies = async () => {
   setMovies(allMovies);
 };
 
-{/* Buscador de trailer en español e ingles */}
+// Buscador de trailer en español e ingles 
 
 const fetchTrailer = async (movieId) => {
   // Buscar en español primero
@@ -121,7 +124,7 @@ const fetchTrailer = async (movieId) => {
     setMovies(data.results);
   };
 
-  {/* Seccion de categorias */}
+  // Seccion de categorias 
   const categories = [
     { id: "popular", name: "Populares" },
     { id: "top_rated", name: "Mejor Valoradas" },
@@ -130,8 +133,10 @@ const fetchTrailer = async (movieId) => {
   ];
   
   const getMoviesByCategory = async (category) => {
-    setMovies([]); // Vacía el grid antes de cargar las nuevas
-    setSelectedMovie(null); // Cierra modal si estaba abierto
+    setActiveCategory(category);
+    setActiveGenre(null); // resetea género si cambio de categoría
+    setMovies([]);
+    setSelectedMovie(null);
     window.scrollTo(0, 0);
   
     let allMovies = [];
@@ -148,7 +153,10 @@ const fetchTrailer = async (movieId) => {
     setMovies(allMovies);
   };
   
+  
   const getMoviesByGenre = async (genreId) => {
+    setActiveGenre(genreId);
+    setActiveCategory(null); // resetea categoría si cambio de género
     setMovies([]);
     setSelectedMovie(null);
     window.scrollTo(0, 0);
@@ -168,6 +176,7 @@ const fetchTrailer = async (movieId) => {
   };
   
   
+  
 
   return (
     
@@ -175,7 +184,7 @@ const fetchTrailer = async (movieId) => {
       {/* HEADER */}
       <header className="mb-8 text-center ">
   <h1 className="text-5xl font-extrabold text-red-500 tracking-wide drop-shadow-lg ">
-    🎬 TrailerHub
+    🎬 TrailerBox
   </h1>
   <p className="text-gray-400 mt-2 text-lg">
     Explora y mira trailers de tus películas favoritas
@@ -210,17 +219,19 @@ const fetchTrailer = async (movieId) => {
   </div>
 
   <div className="flex flex-wrap justify-center gap-3 mb-6">
-    {categories.map((cat) => (
-      <button
-        key={cat.id}
-        onClick={() => getMoviesByCategory(cat.id)}
-        className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 
-                   px-5 py-2 rounded-xl text-white font-semibold shadow-lg 
-                   hover:shadow-red-500/40 transform hover:scale-105 transition-all duration-300 cursor-pointer"
-      >
-        {cat.name}
-      </button>
-    ))}
+  {categories.map((cat) => (
+  <button
+    key={cat.id}
+    onClick={() => getMoviesByCategory(cat.id)}
+    className={`px-5 py-2 rounded-full font-semibold transition-all duration-300 cursor-pointer
+      ${activeCategory === cat.id 
+        ? "bg-red-600 text-white shadow-lg shadow-red-500/40" 
+        : "bg-red-500 hover:bg-red-600 text-white"}`}
+  >
+    {cat.name}
+  </button>
+))}
+
   </div>
 
   {/* Seccion Géneros */}
@@ -232,23 +243,25 @@ const fetchTrailer = async (movieId) => {
   </div>
 
   <div className="flex flex-wrap justify-center gap-2">
-    {genres.map((genre) => (
-      <button
-        key={genre.id}
-        onClick={() => getMoviesByGenre(genre.id)}
-        className="bg-gray-800 hover:bg-red-500 px-4 py-2 rounded-xl 
-                   text-white text-sm font-semibold shadow-md 
-                   hover:shadow-red-500/30 transform hover:scale-105 transition-all duration-300 cursor-pointer"
-      >
-        {genre.name}
-      </button>
-    ))}
+  {genres.map((genre) => (
+  <button
+    key={genre.id}
+    onClick={() => getMoviesByGenre(genre.id)}
+    className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 cursor-pointer
+      ${activeGenre === genre.id
+        ? "bg-red-600 text-white shadow-lg shadow-red-500/40"
+        : "bg-gray-800 hover:bg-red-500 text-white"}`}
+  >
+    {genre.name}
+  </button>
+))}
+
   </div>
 </div>
 
 
       {/* Seccion Grid de películas */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+      <div className="grid grid-cols-3 lg:grid-cols-5 gap-6">
         {movies.map((movie) => (
          <div
          key={movie.id}
@@ -258,7 +271,7 @@ const fetchTrailer = async (movieId) => {
          <img
            src={`${IMAGE_BASE_URL}${movie.poster_path}`}
            alt={movie.title}
-           className="w-full h-80 object-cover"
+           className="w-full aspect-[2/3] object-cover"
          />
          <div className="p-3">
            <h2 className="text-lg font-semibold truncate">{movie.title}</h2>
