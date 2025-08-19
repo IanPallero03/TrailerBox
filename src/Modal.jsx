@@ -24,7 +24,7 @@ export default function Modal({ movie, onClose, isClosing }) {
         <h2 className="text-2xl font-bold mb-3">{movie.title}</h2>
 
         {/* Descripción */}
-        <p className="text-gray-300 mb-4 text-sm">
+        <p className="text-gray-300 mb-4 text-xs">
           {movie.overview || "Sin descripción disponible."}
         </p>
 
